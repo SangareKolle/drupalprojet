@@ -1,0 +1,7 @@
+name = reCAPTCHA v3
+description = reCAPTCHA v3 returns a score for each request without user friction. The score is based on interactions with your site and enables you to take an appropriate action for your site.
+core = 7.x
+package = Spam control
+dependencies[] = recaptcha
+configure = admin/config/people/captcha/recaptcha-v3
+php = 5.3.2

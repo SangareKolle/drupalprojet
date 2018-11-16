@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * Installation file for reCAPTCHA v3 module.
+ */
+
+
+/**
+ * Implements hook_uninstall().
+ */
+function recaptcha_v3_uninstall() {
+  db_delete('variable')
+    ->condition('name', db_like('recaptcha_v3_') . '%', 'LIKE')
+    ->execute();
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function recaptcha_v3_schema() {
+  $schema['recaptcha_v3_actions'] = array(
+    'description' => 'This table describes recaptcha v3 actions.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The recapcha v3 action.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'action' => array(
+        'description' => 'The reaptcha v3 action.',
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length' => 128,
+        'default' => '',
+      ),
+      'score' => array(
+        'description' => 'Score threshold to verify as user.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 5,
+      ),
+      'challenge' => array(
+        'description' => 'The recapcha v3 action.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
