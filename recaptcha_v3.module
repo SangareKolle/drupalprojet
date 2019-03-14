@@ -60,6 +60,7 @@ function recaptcha_v3_menu() {
  */
 function recaptcha_v3_element_info_alter(&$type) {
   array_unshift($type['captcha']['#process'], 'recaptcha_v3_element_captcha_process');
+  $type['captcha']['#process'][] =  'recaptcha_v3_element_captcha_process_validate';
 }
 
 /**
@@ -114,34 +115,65 @@ function recaptcha_v3_element_captcha_process($element, &$form_state, $complete_
     $element['#recaptcha_v3_valid'] = FALSE;
     $element['#recaptcha_v3_token'] = FALSE;
     $element['#recaptcha_v3_action'] = _recaptcha_v3_get_action_by_id($parts[1]);
-    if (isset($form_state['input']['recaptcha_v3_token'])) {
-      $element['#recaptcha_v3_token'] = $form_state['input']['recaptcha_v3_token'];
-    }
-    if ($form_state['process_input'] && $element['#recaptcha_v3_token']) {
-      $element['#recaptcha_v3_valid'] = recaptcha_v3_token_validate($element);
-    }
-    // Recaptcha v3 verification failed - try to find fallback challenge
-    if ($form_state['process_input'] && !$element['#recaptcha_v3_valid']) {
-      $challenge = $element['#recaptcha_v3_action']['challenge'];
-      $challenge = empty($challenge) ? variable_get('recaptcha_v3_captcha_default_challenge', FALSE) : $challenge;
-      // If fallback challenge exist - change captcha type to this value,
-      // so instead of recaptcha v3 selected fallback widget will be processed
-      if (!empty($challenge)) {
-        $element['#captcha_type'] = $challenge;
+    if ($form_state['process_input']) {
+      if (isset($form_state['input']['recaptcha_v3_token'])) {
+        $element['#recaptcha_v3_token'] = $form_state['input']['recaptcha_v3_token'];
+      }
+      if ($element['#recaptcha_v3_token']) {
+        $element['#recaptcha_v3_valid'] = recaptcha_v3_token_validate($element);
+      }
+      // Recaptcha v3 verification failed - try to find fallback challenge
+      if (!$element['#recaptcha_v3_valid']) {
+        $challenge = $element['#recaptcha_v3_action']['challenge'];
+        $challenge = empty($challenge) ? variable_get('recaptcha_v3_captcha_default_challenge', FALSE) : $challenge;
+        // If fallback challenge exist - change captcha type to this value,
+        // so instead of recaptcha v3 selected fallback widget will be processed
+        if (!empty($challenge)) {
+          $element['#captcha_type'] = $challenge;
+        }
       }
     }
   }
   return $element;
 }
 
+/**
+ * In case of failed recaptcha v3 token validation need to replace captcha
+ * validate callback in $element['#captcha_validate'] for displaying
+ * correct error message (otherwise will be executed replaced challenge validation
+ * with possible passed validation or wrong error message).
+ *
+ * @param $element
+ * @param $form_state
+ * @param $complete_form
+ *
+ * @return mixed
+ */
+function recaptcha_v3_element_captcha_process_validate($element, &$form_state, $complete_form) {
+  // Replacing validation callback only if correct next statements:
+  // 1. user submit form
+  // 2. in form exist recaptcha v3 token element
+  if ($form_state['process_input'] && !empty($element['#recaptcha_v3_token'])) {
+    $element['#captcha_validate'] = 'recaptcha_v3_captcha_validate';
+  }
+  return $element;
+}
+
+/**
+ * Validate recaptcha token.
+ *
+ * @param $element
+ *
+ * @return bool
+ */
 function recaptcha_v3_token_validate($element) {
   if (empty($element['#recaptcha_v3_token'])) {
-    watchdog('reCAPTCHA v3', 'Missing recaptcha v3 token value', WATCHDOG_ERROR);
+    watchdog('reCAPTCHA v3', 'Missing recaptcha v3 token value', array(), WATCHDOG_ERROR);
     return FALSE;
   }
 
   if (empty($element['#recaptcha_v3_action']['action'])) {
-    watchdog('reCAPTCHA v3', 'Missing recaptcha v3 action value', WATCHDOG_ERROR);
+    watchdog('reCAPTCHA v3', 'Missing recaptcha v3 action value', array(), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -162,12 +194,12 @@ function recaptcha_v3_token_validate($element) {
   if ($resp->isSuccess()) {
     // wrong action id
     if ($resp->getAction() !== $element['#recaptcha_v3_action']['action']) {
-      watchdog('reCAPTCHA v3', 'Mismatched site and response actions.', WATCHDOG_ERROR);
+      watchdog('reCAPTCHA v3', 'Mismatched site and response actions.', array(), WATCHDOG_ERROR);
       return FALSE;
     }
     // To low user trust score level
     if ($resp->getScore() < $element['#recaptcha_v3_action']['score'] / 10) {
-      watchdog('reCAPTCHA v3', 'Response score lower then action threshold score.', WATCHDOG_ERROR);
+      watchdog('reCAPTCHA v3', 'Response score lower then action threshold score.', array(),WATCHDOG_ERROR);
       return FALSE;
     }
     // Verified!
@@ -208,10 +240,17 @@ function recaptcha_v3_captcha_validate($solution, $response, $element, &$form_st
   if ($element['#recaptcha_v3_valid'] === TRUE) {
     return TRUE;
   }
-  form_error($element, t('reCAPTCHA validation failed!'));
+  $message = variable_get('recaptcha_v3_error_message', t('Recaptcha verification failed.'));
+  form_error($element, $message);
   return FALSE;
 }
 
+/**
+ * Form element for recaptcha v3.
+ * @param $action
+ *
+ * @return array
+ */
 function recaptcha_v3_token_element($action) {
   return array(
     '#type' => 'hidden',

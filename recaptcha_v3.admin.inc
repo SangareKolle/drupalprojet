@@ -49,8 +49,8 @@ function recaptcha_v3_admin_settings($form, &$form_state) {
   $challenges = array_merge(array('' => t('None')), $challenges);
   $form['actions_settings']['recaptcha_v3_captcha_default_challenge'] = array(
     '#type' => 'select',
-    '#title' => t('Default challenge type'),
-    '#description' => t('Select the default challenge type on verification fail.'),
+    '#title' => t('Default fallback challenge type'),
+    '#description' => t('Select the default fallback challenge type on verification fail.'),
     '#options' => $challenges,
     '#default_value' => variable_get('recaptcha_v3_captcha_default_challenge', 'recaptcha/recaptcha'),
   );
@@ -82,7 +82,7 @@ function recaptcha_v3_admin_settings($form, &$form_state) {
     );
     $form['actions_settings']['overview'][$id]['challenge'] = array(
       '#type' => 'select',
-      '#title' => t('Challenge'),
+      '#title' => t('Fallback challenge'),
       '#title_display' => 'invisible',
       '#options' => $challenges,
       '#default_value' => $action['challenge'],
@@ -123,7 +123,7 @@ function recaptcha_v3_admin_settings($form, &$form_state) {
   );
   $form['actions_settings']['new']['challenge'] = array(
     '#type' => 'select',
-    '#title' => t('Challenge'),
+    '#title' => t('Fallback challenge'),
     '#options' => $challenges,
   );
   $form['actions_settings']['new']['description'] = array(
@@ -133,6 +133,13 @@ function recaptcha_v3_admin_settings($form, &$form_state) {
       t('Additional verification <strong>Challenge</strong> will be executed, if google verification response scores will be lower then in <strong>Scores</strong> select box.'),
       t('If <strong>Challenge</strong> value is <strong>None</strong>, then instead additional challenge recaptcha v3 will be used again. This may cause unability to submit form.'),
     ),
+  );
+  $form['actions_settings']['recaptcha_v3_error_message'] = array(
+    '#type' => 'textfield',
+    '#size' => 128,
+    '#title' => t('Error message'),
+    '#description' => t('This message will be displayed to user in case of failed recaptcha v3 verification.'),
+    '#default_value' => variable_get('recaptcha_v3_error_message', t('Recaptcha verification failed.')),
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -155,8 +162,7 @@ function theme_recaptcha_v3_admin_settings_actions_overview($variables) {
     $row[] = l(t('delete'), "admin/config/people/captcha/recaptcha-v3/{$key}/delete");
     $rows[] = $row;
   }
-  $output = theme('table', array('header' => $header, 'rows' => $rows));
-  return $output;
+  return theme('table', array('header' => $header, 'rows' => $rows));
 }
 
 /**
@@ -197,6 +203,8 @@ function recaptcha_v3_admin_settings_submit($form, &$form_state) {
   variable_set('recaptcha_v3_secret_key', $form_state['values']['recaptcha_v3_secret_key']);
   variable_set('recaptcha_v3_verify_hostname', $form_state['values']['recaptcha_v3_verify_hostname']);
   variable_set('recaptcha_v3_captcha_default_challenge', $form_state['values']['actions_settings']['recaptcha_v3_captcha_default_challenge']);
+  variable_set('recaptcha_v3_error_message', $form_state['values']['actions_settings']['recaptcha_v3_error_message']);
+
   $actions = _recaptcha_v3_get_all_actions();
   if (!empty($form_state['values']['actions_settings']['overview'])) {
     $count = 0;
