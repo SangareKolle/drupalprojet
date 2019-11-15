@@ -1,4 +1,5 @@
 name: 'reCAPTCHA v3'
+type: module
 description: 'The reCaptcha V3 module provides integration with Google reCaptcha V3 and CAPTCHA module.'
 core: 8.x
 package: Spam control
