@@ -2,6 +2,7 @@
 
 namespace Drupal\recaptcha_v3\Form;
 
+use Drupal\captcha\Service\CaptchaService;
 use Drupal\Core\Asset\LibraryDiscoveryInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
@@ -25,16 +26,25 @@ class ReCaptchaV3SettingsForm extends ConfigFormBase {
   protected $elementInfoManager;
 
   /**
+   * The CAPTCHA helper service.
+   *
+   * @var \Drupal\captcha\Service\CaptchaService
+   */
+  protected $captchaService;
+
+  /**
    * ReCaptchaV3SettingsForm constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    * @param \Drupal\Core\Asset\LibraryDiscoveryInterface $library_discovery
    * @param \Drupal\Core\Render\ElementInfoManager $element_info_manager
+   * @param \Drupal\captcha\Service\CaptchaService $captcha_service
    */
-  public function __construct(ConfigFactoryInterface $config_factory, LibraryDiscoveryInterface $library_discovery, ElementInfoManager $element_info_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, LibraryDiscoveryInterface $library_discovery, ElementInfoManager $element_info_manager, CaptchaService $captcha_service) {
     parent::__construct($config_factory);
     $this->libraryDiscovery = $library_discovery;
     $this->elementInfoManager = $element_info_manager;
+    $this->captchaService = $captcha_service;
   }
 
   /**
@@ -44,7 +54,8 @@ class ReCaptchaV3SettingsForm extends ConfigFormBase {
     return new static (
       $container->get('config.factory'),
       $container->get('library.discovery'),
-      $container->get('plugin.manager.element_info')
+      $container->get('plugin.manager.element_info'),
+      $container->get('captcha.helper')
     );
   }
 
@@ -94,11 +105,12 @@ class ReCaptchaV3SettingsForm extends ConfigFormBase {
       '#description' => $this->t('Checks the hostname on your server when verifying a solution. Enable this validation only, if <em>Verify the origin of reCAPTCHA solutions</em> is unchecked for your key pair. Provides crucial security by verifying requests come from one of your listed domains.'),
     ];
 
-    module_load_include('inc', 'captcha', 'captcha.admin');
-    $challenges = _captcha_available_challenge_types(FALSE);
-    $challenges = array_filter($challenges ?? [], static function ($captcha_type) {
+    $challenges = $this->captchaService->getAvailableChallengeTypes(FALSE);
+    // Remove recaptcha v3 challenges from the list of available
+    // fallback challenges.
+    $challenges = array_filter($challenges, static function ($captcha_type) {
       return !(strpos($captcha_type, 'recaptcha_v3') === 0);
-    });
+    }, ARRAY_FILTER_USE_KEY);
 
     $form['default_challenge'] = [
       '#type' => 'select',
@@ -120,12 +132,10 @@ class ReCaptchaV3SettingsForm extends ConfigFormBase {
     return parent::buildForm($form, $form_state);
   }
 
-
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    parent::submitForm($form, $form_state);
     $values = $form_state->getValues();
     $config = $this->config('recaptcha_v3.settings');
     // If site key have been changed, then need to rebuild site libraries and elements.
@@ -140,8 +150,8 @@ class ReCaptchaV3SettingsForm extends ConfigFormBase {
       ->set('default_challenge', $values['default_challenge'])
       ->set('error_message', $values['error_message'])
       ->save();
-    $this->messenger()
-      ->addStatus($this > t('The reCAPTCHA v3 settings have been saved.'));
+
+    parent::submitForm($form, $form_state);
   }
 
 }

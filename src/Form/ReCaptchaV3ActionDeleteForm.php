@@ -2,52 +2,23 @@
 
 namespace Drupal\recaptcha_v3\Form;
 
-use Drupal\Core\Entity\EntityConfirmFormBase;
+use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 
 /**
  * Builds the form to delete reCAPTCHA v3 action entities.
  */
-class ReCaptchaV3ActionDeleteForm extends EntityConfirmFormBase {
+class ReCaptchaV3ActionDeleteForm extends EntityDeleteForm {
 
   /**
    * {@inheritdoc}
    */
-  public function getQuestion() {
-    return $this->t('Are you sure you want to delete action %label?', ['%label' => $this->entity->label()]);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getConfirmText() {
-    return $this->t('Delete');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-    if ($this->entity->delete()) {
-      $this->messenger()->addStatus($this->t('Action %label with %id deleted.', [
-        '%id' => $this->entity->id(),
-        '%label' => $this->entity->label(),
-      ]));
-      $this->getLogger('recaptcha_v3')->info('Action %label with %id deleted.', [
-        '%id' => $this->entity->id(),
-        '%label' => $this->entity->label(),
-      ]);
-    }
-
-    $form_state->setRedirectUrl($this->getCancelUrl());
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCancelUrl() {
-    return new Url('entity.recaptcha_v3_action.collection');
+  public function buildForm(array $form, FormStateInterface $form_state) {
+    /**
+     * @todo need to find count of captcha points using deleted action and show appropriate title
+     * @see \Drupal\node\Form\NodeTypeDeleteConfirm::buildForm()
+     */
+    return parent::buildForm($form, $form_state);
   }
 
 }

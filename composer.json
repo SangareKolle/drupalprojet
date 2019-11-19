@@ -5,6 +5,7 @@
   "license": "GPL-2.0+",
   "minimum-stability": "dev",
   "require": {
-    "google/recaptcha": "^1.2"
+    "google/recaptcha": "^1.2",
+    "drupal/captcha": "^1.0.0-beta4"
   }
 }

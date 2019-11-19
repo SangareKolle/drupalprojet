@@ -1,4 +1,4 @@
-recaptcha_v3.admin_settings_form:
+recaptcha_v3.settings:
   path: '/admin/config/people/captcha/recaptcha-v3'
   defaults:
     _form: '\Drupal\recaptcha_v3\Form\ReCaptchaV3SettingsForm'
@@ -7,35 +7,3 @@ recaptcha_v3.admin_settings_form:
     _permission: 'administer CAPTCHA settings'
   options:
     _admin_route: TRUE
-
-entity.recaptcha_v3_action.collection:
-  path: '/admin/config/people/captcha/recaptcha-v3-actions'
-  defaults:
-    _entity_list: 'recaptcha_v3_action'
-    _title: 'reCAPTCHA v3 actions'
-  requirements:
-    _permission: 'administer CAPTCHA settings'
-
-entity.recaptcha_v3_action.add_form:
-  path: '/admin/config/people/captcha/recaptcha-v3-actions/add'
-  defaults:
-    _entity_form: 'recaptcha_v3_action.add'
-    _title: 'Add reCAPTCHA v3 action'
-  requirements:
-    _permission: 'administer CAPTCHA settings'
-
-entity.recaptcha_v3_action.edit_form:
-  path: '/admin/config/people/captcha/recaptcha-v3-actions/{recaptcha_v3_action}'
-  defaults:
-    _entity_form: 'recaptcha_v3_action.edit'
-    _title: 'Edit reCAPTCHA v3 action'
-  requirements:
-    _permission: 'administer CAPTCHA settings'
-
-entity.recaptcha_v3_action.delete_form:
-  path: '/admin/config/people/captcha/recaptcha-v3-actions/{recaptcha_v3_action}/delete'
-  defaults:
-    _entity_form: 'recaptcha_v3_action.delete'
-    _title: 'Delete reCAPTCHA v3 action'
-  requirements:
-    _permission: 'administer CAPTCHA settings'

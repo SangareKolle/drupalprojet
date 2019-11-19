@@ -1,4 +1,4 @@
-recaptcha_v3.admin_settings_form:
+recaptcha_v3.settings:
   route_name: recaptcha_v3.settings
   title: reCAPTCHA v3
   base_route: captcha_settings

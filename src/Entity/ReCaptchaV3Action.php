@@ -3,7 +3,7 @@
 namespace Drupal\recaptcha_v3\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use ReCaptcha\ReCaptcha;
+use Drupal\recaptcha_v3\ReCaptchaV3ActionInterface;
 
 /**
  * Defines the reCAPTCHA v3 action entity.
@@ -26,11 +26,8 @@ use ReCaptcha\ReCaptcha;
  *       "edit" = "Drupal\recaptcha_v3\Form\ReCaptchaV3ActionForm",
  *       "delete" = "Drupal\recaptcha_v3\Form\ReCaptchaV3ActionDeleteForm"
  *     },
- *     "local_task_provider" = {
- *       "default" = "Drupal\entity\Menu\DefaultEntityLocalTaskProvider",
- *     },
  *     "route_provider" = {
- *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
+ *       "default" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
  *     },
  *   },
  *   config_prefix = "recaptcha_v3_action",
@@ -88,61 +85,38 @@ class ReCaptchaV3Action extends ConfigEntityBase implements ReCaptchaV3ActionInt
   protected $challenge = 'default';
 
   /**
-   * Create empty action entity;
-   *
-   * @return \Drupal\recaptcha_v3\Entity\ReCaptchaV3Action
+   * {@inheritdoc}
    */
-  public static function createEmptyAction() {
-    return static::create([
-      'id' => '',
-      'label' => '',
-      'threshold' => 1,
-      'challenge' => 'default',
-    ]);
-  }
-
-  public function verifyToken($token) {
-    $request = \Drupal::request();
-    $config = \Drupal::config('recaptcha_v3.settings');
-    $secret_key = $config->get('secret_key');
-    $recaptcha = new ReCaptcha($secret_key);
-
-    if ($config->get('verify_hostname')) {
-      $recaptcha->setExpectedHostname($request->getHost());
-    }
-
-    return $recaptcha->setExpectedAction($this->id)
-      ->setScoreThreshold($this->threshold)
-      ->verify($token, $request->getClientIp())
-      ->toArray();
+  public function setLabel(string $label) {
+    $this->label = $label;
   }
 
   /**
-   * @return string
+   * {@inheritdoc}
    */
-  public function getId() {
-    return $this->id;
-  }
-
-  /**
-   * @return string
-   */
-  public function getLabel() {
-    return $this->label;
-  }
-
-  /**
-   * @return float
-   */
-  public function getThreshold() {
+  public function getThreshold(): float {
     return $this->threshold;
   }
 
   /**
-   * @return string
+   * {@inheritdoc}
    */
-  public function getChallenge() {
+  public function setThreshold(float $threshold) {
+    $this->threshold = $threshold;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getChallenge(): string {
     return $this->challenge;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setChallenge(string $challenge) {
+    $this->challenge = $challenge;
   }
 
 }

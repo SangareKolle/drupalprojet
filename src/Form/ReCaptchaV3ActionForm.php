@@ -2,10 +2,11 @@
 
 namespace Drupal\recaptcha_v3\Form;
 
-use function array_filter;
+use Drupal\captcha\Service\CaptchaService;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use function strpos;
+use Drupal\recaptcha_v3\ReCaptchaV3ActionInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class ReCaptchaV3ActionForm.
@@ -13,13 +14,35 @@ use function strpos;
 class ReCaptchaV3ActionForm extends EntityForm {
 
   /**
+   * The CAPTCHA helper service.
+   *
+   * @var \Drupal\captcha\Service\CaptchaService
+   */
+  protected $captchaService;
+
+  /**
+   * Constructs a ReCaptchaV3ActionForm
+   *
+   * @param \Drupal\captcha\Service\CaptchaService $captcha_service
+   */
+
+  public function __construct(CaptchaService $captcha_service) {
+    $this->captchaService = $captcha_service;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static($container->get('captcha.helper'));
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state) {
-    module_load_include('inc', 'captcha', 'captcha.admin');
-
     $form = parent::form($form, $form_state);
-    /** @var \Drupal\recaptcha_v3\Entity\ReCaptchaV3Action $recaptcha_v3_action */
+    /** @var ReCaptchaV3ActionInterface $recaptcha_v3_action */
     $recaptcha_v3_action = $this->entity;
     $form['label'] = [
       '#type' => 'textfield',
@@ -45,21 +68,25 @@ class ReCaptchaV3ActionForm extends EntityForm {
       '#min' => 0,
       '#max' => 1,
       '#step' => 0.1,
-      '#default_value' => $recaptcha_v3_action->get('threshold'),
+      '#default_value' => $recaptcha_v3_action->getThreshold(),
     ];
 
-    $challenges = _captcha_available_challenge_types(FALSE);
-    foreach ($challenges as $captcha_type => $challenge) {
-      if (strpos($captcha_type, 'recaptcha_v3') === 0) {
-        unset($challenges[$captcha_type]);
-      }
-    }
+    /**
+     * @todo the same code lines using in several other places need to refactor this. Maybe create method in recaptcha v3 action storage?
+     */
+    $challenges = $this->captchaService->getAvailableChallengeTypes(FALSE);
+    // Remove recaptcha v3 challenges from the list of available
+    // fallback challenges.
+    $challenges = array_filter($challenges, static function ($captcha_type) {
+      return !(strpos($captcha_type, 'recaptcha_v3') === 0);
+    }, ARRAY_FILTER_USE_KEY);
+
     $form['challenge'] = [
       '#type' => 'select',
       '#title' => $this->t('Fallback challenge'),
       '#description' => $this->t('Select the fallback challenge on reCAPTCHA v3 user validation fail.'),
       '#options' => $challenges,
-      '#default_value' => $recaptcha_v3_action->get('challenge'),
+      '#default_value' => $recaptcha_v3_action->getChallenge(),
       '#empty_option' => $this->t('Default fallback challenge'),
       '#empty_value' => 'default',
     ];
@@ -71,31 +98,25 @@ class ReCaptchaV3ActionForm extends EntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    /** @var \Drupal\recaptcha_v3\Entity\ReCaptchaV3Action $recaptcha_v3_action */
-    $recaptcha_v3_action = $this->entity;
-    $status = $recaptcha_v3_action->save();
-
-    switch ($status) {
+    $label = $this->entity->label();
+    $saved_state = parent::save($form, $form_state);
+    switch ($saved_state) {
       case SAVED_NEW:
-        $this->messenger()->addStatus($this->t('Created the %label reCAPTCHA v3 action.', [
-          '%label' => $recaptcha_v3_action->label(),
-        ]));
+        $this->messenger()
+          ->addStatus($this->t('Created the %label reCAPTCHA v3 action.', ['%label' => $label]));
         $this->getLogger('recaptcha_v3')
-          ->info('Created the %label reCAPTCHA v3 action.', [
-            '%label' => $recaptcha_v3_action->label(),
-          ]);
+          ->info('Created the %label reCAPTCHA v3 action.', ['%label' => $label]);
         break;
 
       default:
         $this->messenger()
-          ->addStatus($this->t('Saved the %label reCAPTCHA v3 action.', [
-            '%label' => $recaptcha_v3_action->label(),
-          ]));
-        $this->getLogger('recaptcha_v3')->info('Saved the %label reCAPTCHA v3 action.', [
-          '%label' => $recaptcha_v3_action->label(),
-        ]);
+          ->addStatus($this->t('Saved the %label reCAPTCHA v3 action.', ['%label' => $label]));
+        $this->getLogger('recaptcha_v3')
+          ->info('Saved the %label reCAPTCHA v3 action.', ['%label' => $label]);
     }
-    $form_state->setRedirectUrl($recaptcha_v3_action->toUrl('collection'));
+
+    $form_state->setRedirectUrl($this->entity->toUrl('collection'));
+    return $saved_state;
   }
 
 }

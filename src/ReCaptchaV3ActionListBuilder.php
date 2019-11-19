@@ -27,20 +27,21 @@ class ReCaptchaV3ActionListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
+    /** @var \Drupal\recaptcha_v3\ReCaptchaV3ActionInterface $entity */
     $row['label'] = $entity->label();
     $row['id'] = $entity->id();
-    $row['threshold'] = $entity->get('threshold');
-    $challenge_type = $entity->get('challenge');
-    $challenge_types = $this->getCaptchaChallengeTypes();
-    $row['challenge'] = $challenge_types[$challenge_type] ?? $this->t('Not defined');
-    // You probably want a few more properties here...
+    $row['threshold'] = $entity->getThreshold();
+    $challenge_type = $entity->getChallenge();
+    $row['challenge'] = $this->getCaptchaChallengeTypes()[$challenge_type] ?? $this->t('Not defined');
     return $row + parent::buildRow($entity);
   }
 
   protected function getCaptchaChallengeTypes() {
     if ($this->challengeTypes === NULL) {
-      module_load_include('inc', 'captcha', 'captcha.admin');
-      $this->challengeTypes = _captcha_available_challenge_types(FALSE);
+      $this->challengeTypes = \Drupal::service('captcha.helper')->getAvailableChallengeTypes(FALSE);
+      $this->challengeTypes = array_filter($this->challengeTypes, static function ($captcha_type) {
+        return !(strpos($captcha_type, 'recaptcha_v3') === 0);
+      }, ARRAY_FILTER_USE_KEY);
       $default = \Drupal::config('recaptcha_v3.settings')->get('default_challenge');
       $this->challengeTypes['default'] = $this->challengeTypes[$default] ?? $this->t('Default');
     }
