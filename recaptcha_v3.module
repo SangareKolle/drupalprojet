@@ -78,24 +78,17 @@ function recaptcha_v3_element_info_alter(array &$info) {
  * @return mixed
  */
 function recaptcha_v3_pre_captcha_element_process(&$element, FormStateInterface $form_state, &$complete_form) {
-  // Some alterations needed only if:
-  // form was submitted or performed form API ajax request.
+  // If form is processed input then recaptcha v3 response should be in
+  // form values and need replace reCAPTCHA v3 element by fallback
+  // challenge before captcha module lement process callback, because otherwise
+  // in case of error form will not rebuild and recaptcha v3 element will
+  // return again.
   if ($form_state->isProcessingInput()) {
 
-    \Drupal::moduleHandler()->loadInclude('captcha', 'module', 'inc');
+    \Drupal::moduleHandler()->loadInclude('captcha', 'inc', 'captcha');
     [$captcha_type_module, $captcha_type_challenge] = _captcha_parse_captcha_type($element['#captcha_type']);
 
-    if ($captcha_type_module !== 'recaptcha_v3') {
-      return $element;
-    }
-
-    // If form_state storage has already verification response,
-    // then replace reCAPTCHA v3 captcha by action fallback challenge.
-    // If form is submitted and this is not ajax request, then need to replace
-    // reCAPTCHA v3 element by fallback challenge because otherwise in case of
-    // error form will not rebuild and recaptcha v3 element will return again.
-    $is_ajax_request = \Drupal::request()->query->has(FormBuilderInterface::AJAX_FORM_REQUEST);
-    if (!$is_ajax_request || $form_state->has('recaptcha_v3')) {
+    if ($captcha_type_module === 'recaptcha_v3') {
       $action = ReCaptchaV3Action::load($captcha_type_challenge);
       $challenge = $action ? $action->getChallenge() : 'default';
       // Replacing 'default' challenge by the real captcha challenge.
@@ -122,7 +115,6 @@ function recaptcha_v3_captcha($op, $captcha_type = '', $captcha_sid = NULL) {
       $captcha = [];
       if ($recaptcha_v3_action = ReCaptchaV3Action::load($captcha_type)) {
         $config = \Drupal::config('recaptcha_v3.settings');
-        $action_name = $recaptcha_v3_action->id();
         $captcha['form']['captcha_response'] = [
           '#type' => 'hidden',
           '#default_value' => '',
@@ -132,7 +124,7 @@ function recaptcha_v3_captcha($op, $captcha_type = '', $captcha_sid = NULL) {
             // to attaching event for triggering ajax request,
             'id' => Html::getUniqueId('recaptcha_v3_token'),
             'class' => ['recaptcha-v3-token'],
-            'data-recaptcha-v3-action' => $action_name,
+            'data-recaptcha-v3-action' => $recaptcha_v3_action->id(),
             'data-recaptcha-v3-site-key' => $config->get('site_key'),
           ],
           '#attached' => [
@@ -160,6 +152,8 @@ function recaptcha_v3_captcha($op, $captcha_type = '', $captcha_sid = NULL) {
  * @param $element
  * @param \Drupal\Core\Form\FormStateInterface $form_state
  * @param $complete_form
+ *
+ * @return array
  */
 function recaptcha_v3_post_captcha_element_process(&$element, FormStateInterface $form_state, &$complete_form) {
   if ($form_state->getTemporaryValue('recaptcha_v3_action_name') && !$form_state->has('recaptcha_v3')) {
@@ -191,21 +185,28 @@ function recaptcha_v3_validate($solution, $captcha_response, $element, FormState
     ]);
   $verification_response = _recaptcha_v3_verify_captcha_response($recaptcha_v3, $captcha_response);
 
-  // If we here, then token verification failed.
   if (!$verification_response['success']) {
+    // If we here, then token verification failed.
     if($verification_response['error-codes']) {
       $errors = [];
       foreach ($verification_response['error-codes'] as $code) {
         $errors[] = recaptcha_v3_error_by_code($code);
       }
-      $errors_string = implode(" ", $errors);
+      $errors_string = implode(' ', $errors);
       \Drupal::logger('recaptcha_v3')->error('Google reCAPTCHA v3 validation failed: @error', ['@error' => $errors_string]);
     }
     $error_message = \Drupal::config('recaptcha_v3.settings')
       ->get('error_message');
     $form_state->setError($element, $error_message);
   }
+  // Save captcha response in $form_state storage to prevent
+  // further validation requests.
   $form_state->set('recaptcha_v3', $verification_response);
+  // Need to cache form, because previous line does not make sense
+  // because form will not cached otherwise. Probably this is wrong because
+  // if form set for rebuilding it will not cached anyway.
+  // @todo need to check if need to move next line to the element preprocess callback.
+  $form_state->setCached();
 
   return (bool) $verification_response['success'];
 }
@@ -253,25 +254,28 @@ function _recaptcha_v3_verify_captcha_response(ReCaptchaV3ActionInterface $recap
  * Error code reference, https://developers.google.com/recaptcha/docs/verify
  * @param $code
  *
- * @return mixed
+ * @return \Drupal\Core\StringTranslation\TranslatableMarkup
  */
 function recaptcha_v3_error_by_code($code) {
-  $error_codes = [
-    'timeout-or-duplicate' => t('The response is no longer valid: either is too old or has been used previously.'),
-    'bad-request' => t('The request is invalid or malformed.'),
-    'missing-input-secret' => t('The secret parameter is missing.'),
-    'invalid-input-secret' => t('The secret parameter is invalid or malformed.'),
-    'action-mismatch' => t('Expected action did not match.'),
-    'apk_package_name-mismatch' => t('Expected APK package name did not match.'),
-    'bad-response' => t('Did not receive a 200 from the service.'),
-    'challenge-timeout' => t('Challenge timeout.'),
-    'connection-failed' => t('Could not connect to service.'),
-    'invalid-input-response' => t('The response parameter is invalid or malformed.'),
-    'missing-input-response' => t('The response parameter is missing.'),
-    'hostname-mismatch' => t('Expected hostname did not match.'),
-    'invalid-json' => t('The json response is invalid or malformed.'),
-    'score-threshold-not-met' => t('Score threshold not met.'),
-    'unknown-error' => t('Not a success, but no error codes received!'),
-  ];
+  $error_codes = &drupal_static(__FUNCTION__);
+  if (!isset($error_codes)) {
+    $error_codes = [
+      'timeout-or-duplicate' => t('The response is no longer valid: either is too old or has been used previously.'),
+      'bad-request' => t('The request is invalid or malformed.'),
+      'missing-input-secret' => t('The secret parameter is missing.'),
+      'invalid-input-secret' => t('The secret parameter is invalid or malformed.'),
+      'action-mismatch' => t('Expected action did not match.'),
+      'apk_package_name-mismatch' => t('Expected APK package name did not match.'),
+      'bad-response' => t('Did not receive a 200 from the service.'),
+      'challenge-timeout' => t('Challenge timeout.'),
+      'connection-failed' => t('Could not connect to service.'),
+      'invalid-input-response' => t('The response parameter is invalid or malformed.'),
+      'missing-input-response' => t('The response parameter is missing.'),
+      'hostname-mismatch' => t('Expected hostname did not match.'),
+      'invalid-json' => t('The json response is invalid or malformed.'),
+      'score-threshold-not-met' => t('Score threshold not met.'),
+      'unknown-error' => t('Not a success, but no error codes received!'),
+    ];
+  }
   return $error_codes[$code] ?? $error_codes['unknown-error'];
 }
