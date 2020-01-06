@@ -183,7 +183,7 @@ function recaptcha_v3_validate($solution, $captcha_response, $element, FormState
       'threshold' => 1,
       'challenge' => 'default',
     ]);
-  $verification_response = _recaptcha_v3_verify_captcha_response($recaptcha_v3, $captcha_response);
+  $verification_response = _recaptcha_v3_verify_captcha_response($recaptcha_v3, $input['captcha_response']);
 
   if (!$verification_response['success']) {
     // If we here, then token verification failed.
@@ -195,13 +195,17 @@ function recaptcha_v3_validate($solution, $captcha_response, $element, FormState
       $errors_string = implode(' ', $errors);
       \Drupal::logger('recaptcha_v3')->error('Google reCAPTCHA v3 validation failed: @error', ['@error' => $errors_string]);
     }
+    $form_state->clearErrors();
     $error_message = \Drupal::config('recaptcha_v3.settings')
       ->get('error_message');
-    $form_state->setError($element, $error_message);
+    $form_state->setErrorByName("captcha_response", $error_message);
+  } else {
+    $form_state->clearErrors();
   }
   // Save captcha response in $form_state storage to prevent
   // further validation requests.
   $form_state->set('recaptcha_v3', $verification_response);
+
   // Need to cache form, because previous line does not make sense
   // because form will not cached otherwise. Probably this is wrong because
   // if form set for rebuilding it will not cached anyway.
