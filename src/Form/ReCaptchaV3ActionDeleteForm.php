@@ -14,10 +14,9 @@ class ReCaptchaV3ActionDeleteForm extends EntityDeleteForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    /**
-     * @todo need to find count of captcha points using deleted action and show appropriate title
-     * @see \Drupal\node\Form\NodeTypeDeleteConfirm::buildForm()
-     */
+
+    // @todo need to find count of captcha points using deleted action and show appropriate title
+    // @see \Drupal\node\Form\NodeTypeDeleteConfirm::buildForm()
     return parent::buildForm($form, $form_state);
   }
 

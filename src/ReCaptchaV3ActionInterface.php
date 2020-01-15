@@ -5,11 +5,10 @@ namespace Drupal\recaptcha_v3;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 
 /**
- * Interface ReCaptchaV3ActionInterface
+ * Interface ReCaptchaV3ActionInterface.
  *
  * @package Drupal\recaptcha_v3\Entity
- *
- * Provides an interface defining a recaptcha v3 entity.
+ *    Provides an interface defining a recaptcha v3 entity.
  */
 interface ReCaptchaV3ActionInterface extends ConfigEntityInterface {
 
@@ -17,6 +16,7 @@ interface ReCaptchaV3ActionInterface extends ConfigEntityInterface {
    * Setter for label.
    *
    * @param string $label
+   *   Label of action.
    */
   public function setLabel(string $label);
 
@@ -24,6 +24,7 @@ interface ReCaptchaV3ActionInterface extends ConfigEntityInterface {
    * Getter for threshold.
    *
    * @return float
+   *   Get threshold value.
    */
   public function getThreshold(): float;
 
@@ -31,6 +32,7 @@ interface ReCaptchaV3ActionInterface extends ConfigEntityInterface {
    * Setter for threshold.
    *
    * @param float $threshold
+   *   Set threshold value.
    */
   public function setThreshold(float $threshold);
 
@@ -38,6 +40,7 @@ interface ReCaptchaV3ActionInterface extends ConfigEntityInterface {
    * Getter for challenge.
    *
    * @return string
+   *   Challenge type.
    */
   public function getChallenge(): string;
 
@@ -45,6 +48,7 @@ interface ReCaptchaV3ActionInterface extends ConfigEntityInterface {
    * Setter for challenge.
    *
    * @param string $challenge
+   *   Set challenge type.
    */
   public function setChallenge(string $challenge);
 

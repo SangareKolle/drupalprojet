@@ -17,4 +17,3 @@ recaptcha_v3:
     - core/drupal
     - core/jquery.once
     - recaptcha_v3/google.recaptcha
-

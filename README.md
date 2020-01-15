@@ -11,12 +11,15 @@ CONTENTS OF THIS FILE
 INTRODUCTION
 ------------
 
-This module enables you to easily configure reCaptcha v3 and a fallback challenge (captcha/recaptcha v2 e.g). 
-In case user fails reCaptcha v3, he can be prompted with an additional challenge to prove. 
+This module enables you to easily configure reCaptcha v3
+and a fallback challenge (captcha/recaptcha v2 e.g). 
+In case user fails reCaptcha v3, 
+he can be prompted with an additional challenge to prove. 
 This is an ideal way to maximize security without any user friction.
 
-We no more rely on the reCAPTCHA module for the use of the `recaptcha-php` library which is included in this module, and
-make use of Composer instead of keeping a duplicating code.
+We no more rely on the reCAPTCHA module for the use of the `recaptcha-php`
+library which is included in this module, and make use of 
+Composer instead of keeping a duplicating code.
 
  * For a full description of the module, visit the project page:
    https://www.drupal.org/project/admin_menu
@@ -48,7 +51,8 @@ INSTALLATION
    https://www.drupal.org/documentation/install/modules-themes/modules-8
    for further information.
 
- * If not using Composer, install the google/recaptacha (https://github.com/google/recaptcha) library.
+ * If not using Composer, 
+   install the google/recaptacha (https://github.com/google/recaptcha) library.
  
 CONFIGURATION
 -------------
@@ -57,7 +61,8 @@ CONFIGURATION
     
    - The documentation for Google reCaptcha V3 
    
-     The documentation can be found here https://developers.google.com/recaptcha/docs/v3), 
+     The documentation can be found here 
+     https://developers.google.com/recaptcha/docs/v3), 
      with information regarding keys registration. 
 
  * Create at least one action:

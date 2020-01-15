@@ -16,11 +16,15 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ReCaptchaV3SettingsForm extends ConfigFormBase {
 
   /**
+   * The library discovery service.
+   *
    * @var \Drupal\Core\Asset\LibraryDiscoveryInterface
    */
   protected $libraryDiscovery;
 
   /**
+   * The element info manager.
+   *
    * @var \Drupal\Core\Render\ElementInfoManager
    */
   protected $elementInfoManager;
@@ -36,9 +40,13 @@ class ReCaptchaV3SettingsForm extends ConfigFormBase {
    * ReCaptchaV3SettingsForm constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   Config factory service.
    * @param \Drupal\Core\Asset\LibraryDiscoveryInterface $library_discovery
+   *   Library discovery service.
    * @param \Drupal\Core\Render\ElementInfoManager $element_info_manager
+   *   Element info manager service.
    * @param \Drupal\captcha\Service\CaptchaService $captcha_service
+   *   Captcha service.
    */
   public function __construct(ConfigFactoryInterface $config_factory, LibraryDiscoveryInterface $library_discovery, ElementInfoManager $element_info_manager, CaptchaService $captcha_service) {
     parent::__construct($config_factory);
@@ -51,7 +59,7 @@ class ReCaptchaV3SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static (
+    return new static(
       $container->get('config.factory'),
       $container->get('library.discovery'),
       $container->get('plugin.manager.element_info'),
@@ -138,7 +146,8 @@ class ReCaptchaV3SettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
     $config = $this->config('recaptcha_v3.settings');
-    // If site key have been changed, then need to rebuild site libraries and elements.
+    // If site key have been changed,
+    // then need to rebuild site libraries and elements.
     if ($config->get('site_key') !== $values['site_key']) {
       $this->libraryDiscovery->clearCachedDefinitions();
       $this->elementInfoManager->clearCachedDefinitions();

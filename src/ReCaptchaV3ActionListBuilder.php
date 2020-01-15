@@ -10,6 +10,12 @@ use Drupal\Core\Entity\EntityInterface;
  */
 class ReCaptchaV3ActionListBuilder extends ConfigEntityListBuilder {
 
+  /**
+   * Recaptcha v3 challenge types.
+   *
+   * @var array
+   *    An array of recaptcha v3 challenge types.
+   */
   protected $challengeTypes;
 
   /**
@@ -36,6 +42,12 @@ class ReCaptchaV3ActionListBuilder extends ConfigEntityListBuilder {
     return $row + parent::buildRow($entity);
   }
 
+  /**
+   * Get reCaptcha v3 challenge types.
+   *
+   * @return array
+   *   All reCaptcha v3 challenge types.
+   */
   protected function getCaptchaChallengeTypes() {
     if ($this->challengeTypes === NULL) {
       $this->challengeTypes = \Drupal::service('captcha.helper')->getAvailableChallengeTypes(FALSE);
