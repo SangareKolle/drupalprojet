@@ -5,7 +5,6 @@ namespace Drupal\recaptcha_v3\Form;
 use Drupal\captcha\Service\CaptchaService;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\recaptcha_v3\ReCaptchaV3ActionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -21,11 +20,11 @@ class ReCaptchaV3ActionForm extends EntityForm {
   protected $captchaService;
 
   /**
-   * Constructs a ReCaptchaV3ActionForm
+   * Constructs a ReCaptchaV3ActionForm.
    *
    * @param \Drupal\captcha\Service\CaptchaService $captcha_service
+   *   Captcha service.
    */
-
   public function __construct(CaptchaService $captcha_service) {
     $this->captchaService = $captcha_service;
   }
@@ -42,7 +41,6 @@ class ReCaptchaV3ActionForm extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
-    /** @var ReCaptchaV3ActionInterface $recaptcha_v3_action */
     $recaptcha_v3_action = $this->entity;
     $form['label'] = [
       '#type' => 'textfield',
@@ -71,9 +69,9 @@ class ReCaptchaV3ActionForm extends EntityForm {
       '#default_value' => $recaptcha_v3_action->getThreshold(),
     ];
 
-    /**
-     * @todo the same code lines using in several other places need to refactor this. Maybe create method in recaptcha v3 action storage?
-     */
+    // @todo the same code lines using in several other places
+    // need to refactor this.
+    // Maybe create method in recaptcha v3 action storage?
     $challenges = $this->captchaService->getAvailableChallengeTypes(FALSE);
     // Remove recaptcha v3 challenges from the list of available
     // fallback challenges.
