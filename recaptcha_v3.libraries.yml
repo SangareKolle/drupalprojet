@@ -1,13 +1,12 @@
 google.recaptcha:
   remote: https://github.com/google/recaptcha
   version: "1.2.1"
-  header: true
   license:
     name: BSD
     url: https://github.com/google/recaptcha/blob/master/LICENSE
     gpl-compatible: true
   js:
-    https://www.google.com/recaptcha/api.js: { type: external, minified: true, weight: -200 }
+    https://www.google.com/recaptcha/api.js: { type: external, minified: true, weight: -200, attributes: { defer: true, async: true } }
 
 recaptcha_v3:
   version: VERSION
