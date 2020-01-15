@@ -91,6 +91,8 @@ function recaptcha_v3_pre_captcha_element_process(array &$element, FormStateInte
   if ($form_state->isProcessingInput()) {
 
     \Drupal::moduleHandler()->loadInclude('captcha', 'inc', 'captcha');
+    $captcha_type_module = "";
+    $captcha_type_challenge = "";
     [$captcha_type_module, $captcha_type_challenge] = _captcha_parse_captcha_type($element['#captcha_type']);
 
     if ($captcha_type_module === 'recaptcha_v3') {
