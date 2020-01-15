@@ -1,7 +1,15 @@
+/**
+ * @file
+ * Recaptcha v3 behaviors.
+ */
+
 (function ($, Drupal) {
+  'use strict';
 
   /**
-   * recaptcha v3 js.
+   * Attach recaptcha response token from google with form.
+   *
+   * @type {{attach: Drupal.behaviors.reCaptchaV3.attach}}
    */
   Drupal.behaviors.reCaptchaV3 = {
     attach: function (context, settings) {
@@ -9,10 +17,10 @@
         var $token_element = $(this);
         grecaptcha.ready(function () {
           grecaptcha.execute(
-              $token_element.data('recaptchaV3SiteKey'),
-              {
-                action: $token_element.data('recaptchaV3Action')
-              }
+            $token_element.data('recaptchaV3SiteKey'),
+            {
+              action: $token_element.data('recaptchaV3Action')
+            }
           ).then(function (token) {
             $token_element.val(token);
             $token_element.trigger('change');
