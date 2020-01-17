@@ -40,8 +40,10 @@ function recaptcha_v3_help($route_name, RouteMatchInterface $route_match) {
  */
 function recaptcha_v3_library_info_alter(&$libraries, $extension) {
   if ($extension === 'recaptcha_v3' && isset($libraries['google.recaptcha'])) {
+    $api_url = array_keys($libraries['google.recaptcha']['js']);
+    $api_url = array_shift($api_url);
     $site_key = \Drupal::config('recaptcha_v3.settings')->get('site_key');
-    $key = 'https://www.google.com/recaptcha/api.js?render=' . $site_key;
+    $key = $api_url . '?render=' . $site_key;
     $js = array_shift($libraries['google.recaptcha']['js']);
     $libraries['google.recaptcha']['js'][$key] = $js;
   }
