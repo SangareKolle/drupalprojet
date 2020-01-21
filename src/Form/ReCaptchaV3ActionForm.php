@@ -5,6 +5,7 @@ namespace Drupal\recaptcha_v3\Form;
 use Drupal\captcha\Service\CaptchaService;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\recaptcha_v3\Entity\ReCaptchaV3Action;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -55,7 +56,7 @@ class ReCaptchaV3ActionForm extends EntityForm {
       '#type' => 'machine_name',
       '#default_value' => $recaptcha_v3_action->id(),
       '#machine_name' => [
-        'exists' => '\Drupal\recaptcha_v3\Entity\ReCaptchaV3Action::load',
+        'exists' => [ReCaptchaV3Action::class, 'load'],
       ],
       '#disabled' => !$recaptcha_v3_action->isNew(),
     ];
