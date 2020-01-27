@@ -12,7 +12,7 @@
    * @type {{attach: Drupal.behaviors.reCaptchaV3.attach}}
    */
   Drupal.behaviors.reCaptchaV3 = {
-    attach: function (context, settings) {
+    attach: function (context) {
       $('.recaptcha-v3-token', context).once('recaptcha-v3-token').each(function () {
         var $token_element = $(this);
         grecaptcha.ready(function () {
