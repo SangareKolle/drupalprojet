@@ -6,7 +6,9 @@ use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Builds the form to delete reCAPTCHA v3 action entities.
+ * Provides a confirmation form for deleting reCAPTCHA v3 action entities.
+ *
+ * @internal
  */
 class ReCaptchaV3ActionDeleteForm extends EntityDeleteForm {
 

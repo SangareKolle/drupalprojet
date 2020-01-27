@@ -11,7 +11,7 @@ use Drupal\Core\Render\ElementInfoManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class ReCaptchaV3SettingsForm.
+ * Configure the google reCAPTCHA v3 api and fallback challenge.
  */
 class ReCaptchaV3SettingsForm extends ConfigFormBase {
 

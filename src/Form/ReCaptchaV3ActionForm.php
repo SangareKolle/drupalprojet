@@ -8,7 +8,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class ReCaptchaV3ActionForm.
+ * Form controller for the recaptcha_v3_action entity edit forms.
+ *
+ * @internal
  */
 class ReCaptchaV3ActionForm extends EntityForm {
 
