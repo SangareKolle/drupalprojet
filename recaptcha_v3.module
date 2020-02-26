@@ -209,7 +209,9 @@ function recaptcha_v3_validate($solution, $captcha_response, $element, FormState
     $form_state->clearErrors();
     $error_message = \Drupal::config('recaptcha_v3.settings')
       ->get('error_message');
-    $form_state->setErrorByName("captcha_response", $error_message);
+    if($error_message) {
+      $form_state->setErrorByName("captcha_response", $error_message);
+    }
   }
   else {
     $form_state->clearErrors();
