@@ -91,8 +91,6 @@ function recaptcha_v3_pre_captcha_element_process(array &$element, FormStateInte
   if ($form_state->isProcessingInput()) {
 
     \Drupal::moduleHandler()->loadInclude('captcha', 'inc', 'captcha');
-    $captcha_type_module = "";
-    $captcha_type_challenge = "";
     [$captcha_type_module, $captcha_type_challenge] = _captcha_parse_captcha_type($element['#captcha_type']);
 
     if ($captcha_type_module === 'recaptcha_v3') {
@@ -178,23 +176,19 @@ function recaptcha_v3_post_captcha_element_process(array &$element, FormStateInt
  * CAPTCHA Callback; Validates the reCAPTCHA v3 code.
  */
 function recaptcha_v3_validate($solution, $captcha_response, $element, FormStateInterface $form_state) {
-  $captcha_type_challenge = $form_state->getTemporaryValue('recaptcha_v3_action_name');
-  $input = $form_state->getUserInput();
-  if (!$input['captcha_response']) {
-    return FALSE;
-  }
   // reCAPTCHA v3 was verified in one of the previous request.
   if ($form_state->has('recaptcha_v3')) {
     return (bool) $form_state->get(['recaptcha_v3', 'success']);
   }
+  $captcha_type_challenge = $form_state->getTemporaryValue('recaptcha_v3_action_name');
   // Verify submitted reCAPTCHA v3 token.
   $recaptcha_v3 = ReCaptchaV3Action::load($captcha_type_challenge) ?? ReCaptchaV3Action::create([
-    'id' => '',
-    'label' => '',
-    'threshold' => 1,
-    'challenge' => 'default',
-  ]);
-  $verification_response = _recaptcha_v3_verify_captcha_response($recaptcha_v3, $input['captcha_response']);
+      'id' => '',
+      'label' => '',
+      'threshold' => 1,
+      'challenge' => 'default',
+    ]);
+  $verification_response = _recaptcha_v3_verify_captcha_response($recaptcha_v3, $captcha_response);
 
   if (!$verification_response['success']) {
     // If we here, then token verification failed.
@@ -210,11 +204,23 @@ function recaptcha_v3_validate($solution, $captcha_response, $element, FormState
     $error_message = \Drupal::config('recaptcha_v3.settings')
       ->get('error_message');
     if($error_message) {
-      $form_state->setErrorByName("captcha_response", $error_message);
+      $form_state->setErrorByName('captcha_response', $error_message);
     }
   }
   else {
-    $form_state->clearErrors();
+    $errors = $form_state->getErrors();
+    // If captcha validated, then need to remove error related to the
+    // captcha_response element. Otherwise, for example, if fallback is
+    // captcha Math we will get error about exceeding input value length due to
+    // recaptcha v3 response is much longer than allowed for Math captcha.
+    if (isset($errors['captcha_response'])) {
+      $form_state->clearErrors();
+      foreach ($errors as $name => $error) {
+        if ($name !== 'captcha_response') {
+          $form_state->setErrorByName($name,$error);
+        }
+      }
+    }
   }
   // Save captcha response in $form_state storage to prevent
   // further validation requests.
