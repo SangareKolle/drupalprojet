@@ -82,7 +82,6 @@ function recaptcha_v3_element_info_alter(array &$info) {
  *   Set fallback challenge if recaptcha v3 fail.
  */
 function recaptcha_v3_pre_captcha_element_process(array &$element, FormStateInterface $form_state, array &$complete_form) {
-
   // If form is processed input then recaptcha v3 response should be in
   // form values and need replace reCAPTCHA v3 element by fallback
   // challenge before captcha module lement process callback, because otherwise
@@ -91,7 +90,7 @@ function recaptcha_v3_pre_captcha_element_process(array &$element, FormStateInte
   if ($form_state->isProcessingInput()) {
 
     \Drupal::moduleHandler()->loadInclude('captcha', 'inc', 'captcha');
-    [$captcha_type_module, $captcha_type_challenge] = _captcha_parse_captcha_type($element['#captcha_type']);
+    list($captcha_type_module, $captcha_type_challenge) = _captcha_parse_captcha_type($element['#captcha_type']);
 
     if ($captcha_type_module === 'recaptcha_v3') {
       $action = ReCaptchaV3Action::load($captcha_type_challenge);
