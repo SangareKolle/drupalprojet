@@ -17,6 +17,7 @@ recaptcha_v3.settings:
     error_message:
       type: string
       label: 'Error message'
+      translatable: true
 
 recaptcha_v3.recaptcha_v3_action.*:
   type: config_entity
@@ -30,3 +31,4 @@ recaptcha_v3.recaptcha_v3_action.*:
       label: 'Label'
     uuid:
       type: string
+      label: 'UUID'
