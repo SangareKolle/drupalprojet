@@ -81,6 +81,7 @@ class ReCaptchaV3ActionForm extends EntityForm {
     $challenges = array_filter($challenges, static function ($captcha_type) {
       return !(strpos($captcha_type, 'recaptcha_v3') === 0);
     }, ARRAY_FILTER_USE_KEY);
+    $challenges = ['default' => $this->t('Default fallback challenge')] + $challenges;
 
     $form['challenge'] = [
       '#type' => 'select',
@@ -88,8 +89,8 @@ class ReCaptchaV3ActionForm extends EntityForm {
       '#description' => $this->t('Select the fallback challenge on reCAPTCHA v3 user validation fail.'),
       '#options' => $challenges,
       '#default_value' => $recaptcha_v3_action->getChallenge(),
-      '#empty_option' => $this->t('Default fallback challenge'),
-      '#empty_value' => 'default',
+      '#empty_option' => $this->t('- None -'),
+      '#empty_value' => '',
     ];
 
     return $form;

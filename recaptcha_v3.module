@@ -100,8 +100,12 @@ function recaptcha_v3_pre_captcha_element_process(array &$element, FormStateInte
         $challenge = \Drupal::config('recaptcha_v3.settings')
           ->get('default_challenge');
       }
+
+      if ($challenge) {
+        $element['#captcha_type'] = $challenge;
+      }
+
       $form_state->setTemporaryValue('recaptcha_v3_action_name', $captcha_type_challenge);
-      $element['#captcha_type'] = $challenge;
     }
   }
   return $element;
