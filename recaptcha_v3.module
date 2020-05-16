@@ -147,7 +147,7 @@ function recaptcha_v3_captcha($op, $captcha_type = '', $captcha_sid = NULL) {
         ];
         $captcha['solution'] = TRUE;
         $captcha['captcha_validate'] = 'recaptcha_v3_validate';
-        $captcha['cacheable'] = TRUE;
+        $captcha['cacheable'] = (bool) $config->get('cacheable');
       }
       return $captcha;
   }

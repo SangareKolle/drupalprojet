@@ -18,6 +18,9 @@ recaptcha_v3.settings:
       type: string
       label: 'Error message'
       translatable: true
+    cacheable:
+      type: boolean
+      label: 'Make captcha cacheble'
 
 recaptcha_v3.recaptcha_v3_action.*:
   type: config_entity

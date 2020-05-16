@@ -137,6 +137,13 @@ class ReCaptchaV3SettingsForm extends ConfigFormBase {
       '#description' => $this->t('This message will be displayed to user in case of failed recaptcha v3 verification.'),
       '#default_value' => $config->get('error_message'),
     ];
+
+    $form['cacheable'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Cacheable'),
+      '#description' => $this->t('Make captcha cacheble: can lead to some validation errors like "unknown CAPTCHA session ID".'),
+      '#default_value' => $config->get('cacheable'),
+    ];
     return parent::buildForm($form, $form_state);
   }
 
