@@ -64,4 +64,3 @@ class ReCaptchaActionListBuilderTest extends BrowserTestBase {
   }
 
 }
-
