@@ -14,6 +14,8 @@ use Drupal\Tests\BrowserTestBase;
  */
 class ReCaptchaActionListBuilderTest extends BrowserTestBase {
 
+  protected $defaultTheme = 'stark';
+
   /**
    * Modules to enable.
    *
@@ -21,7 +23,6 @@ class ReCaptchaActionListBuilderTest extends BrowserTestBase {
    */
   protected static $modules = [
     'captcha',
-    'recaptcha',
     'recaptcha_v3',
   ];
 
