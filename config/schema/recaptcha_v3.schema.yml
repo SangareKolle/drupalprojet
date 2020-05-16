@@ -32,6 +32,12 @@ recaptcha_v3.recaptcha_v3_action.*:
     label:
       type: label
       label: 'Label'
+    threshold:
+      type: float
+      label: 'Threshold'
+    challenge:
+      type: string
+      label: 'Challenge'
     uuid:
       type: string
       label: 'UUID'
