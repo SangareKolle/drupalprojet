@@ -183,6 +183,20 @@ function recaptcha_v3_validate($solution, $captcha_response, $element, FormState
   if ($form_state->has('recaptcha_v3')) {
     return (bool) $form_state->get(['recaptcha_v3', 'success']);
   }
+  // Using user input instead of $captcha_response variable, because stupid
+  // recaptcha module wrongly use 'captcha_response' form element -
+  // instead of '#default_value' it using '#value' form api key:
+  // $captcha['form']['captcha_response'] = [
+  //  '#type' => 'hidden',
+  //  '#value' => 'Google no captcha', // Problem is here
+  // ];
+  // so if using recaptcha as fallback challenge, $captcha_response is always
+  // have 'Google no captcha' value.
+  $user_input = $form_state->getUserInput();
+  if (!empty($user_input['captcha_response'])) {
+    $captcha_response = $user_input['captcha_response'];
+  }
+
   $captcha_type_challenge = $form_state->getTemporaryValue('recaptcha_v3_action_name');
   // Verify submitted reCAPTCHA v3 token.
   $recaptcha_v3 = ReCaptchaV3Action::load($captcha_type_challenge) ?? ReCaptchaV3Action::create([
