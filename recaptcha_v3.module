@@ -13,6 +13,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\recaptcha_v3\ReCaptchaV3ActionInterface;
 use ReCaptcha\ReCaptcha;
+use ReCaptcha\RequestMethod\CurlPost;
 
 /**
  * Implements hook_help().
@@ -284,7 +285,7 @@ function recaptcha_v3_ajax_callback(array $form, FormStateInterface $form_state)
 function _recaptcha_v3_verify_captcha_response(ReCaptchaV3ActionInterface $recaptcha_v_3_action, $captcha_response) {
   $request = Drupal::request();
   $config = Drupal::config('recaptcha_v3.settings');
-  $recaptcha = new ReCaptcha($config->get('secret_key'));
+  $recaptcha = new ReCaptcha($config->get('secret_key'), function_exists('curl_version') ? new CurlPost() : null);
 
   if ($config->get('verify_hostname')) {
     $recaptcha->setExpectedHostname($request->getHost());
