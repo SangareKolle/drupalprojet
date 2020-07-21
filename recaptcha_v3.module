@@ -223,19 +223,19 @@ function recaptcha_v3_validate($solution, $captcha_response, $element, FormState
       $errors_string = implode(' ', $errors);
       \Drupal::logger('recaptcha_v3')->error('Google reCAPTCHA v3 validation failed: @error', ['@error' => $errors_string]);
     }
-    $form_state->clearErrors();
+
     $error_message = \Drupal::config('recaptcha_v3.settings')
       ->get('error_message');
-    if ($error_message) {
-      $form_state->setErrorByName('captcha_response', $error_message);
-    }
   }
-  else {
+
+  // If captcha validated, then need to remove error related to the
+  // captcha_response element. Otherwise, for example, if fallback is
+  // captcha Math we will get error about exceeding input value length due to
+  // recaptcha v3 response is much longer than allowed for Math captcha.
+  // In another case if we have custom error message, then need to clear
+  // all current 'captcha_response' element error messages either.
+  if ($verification_response['success'] || !empty($error_message)) {
     $errors = $form_state->getErrors();
-    // If captcha validated, then need to remove error related to the
-    // captcha_response element. Otherwise, for example, if fallback is
-    // captcha Math we will get error about exceeding input value length due to
-    // recaptcha v3 response is much longer than allowed for Math captcha.
     if (isset($errors['captcha_response'])) {
       $form_state->clearErrors();
       foreach ($errors as $name => $error) {
@@ -245,6 +245,11 @@ function recaptcha_v3_validate($solution, $captcha_response, $element, FormState
       }
     }
   }
+
+  if(!empty($error_message)) {
+    $form_state->setErrorByName('captcha_response', $error_message);
+  }
+
   // Save captcha response in $form_state storage to prevent
   // further validation requests.
   $form_state->set('recaptcha_v3', $verification_response);
