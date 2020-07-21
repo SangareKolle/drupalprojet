@@ -127,6 +127,7 @@ function recaptcha_v3_captcha($op, $captcha_type = '', $captcha_sid = NULL) {
         $captcha['form']['captcha_response'] = [
           '#type' => 'hidden',
           '#default_value' => '',
+          '#recaptcha_v3' => TRUE,
           '#attributes' => [
             // Need add id, because element should have id or
             // 'selector' property should exist in #ajax array
@@ -172,6 +173,10 @@ function recaptcha_v3_captcha($op, $captcha_type = '', $captcha_sid = NULL) {
 function recaptcha_v3_post_captcha_element_process(array &$element, FormStateInterface $form_state, array &$complete_form) {
   if ($form_state->getTemporaryValue('recaptcha_v3_action_name') && !$form_state->has('recaptcha_v3')) {
     $element['#captcha_validate'] = 'recaptcha_v3_validate';
+  }
+  // Hide description for the recaptcha v3 captcha element.
+  if (!empty($element['captcha_widgets']['captcha_response']['#recaptcha_v3'])) {
+    unset($element['#description']);
   }
   return $element;
 }
