@@ -204,24 +204,42 @@ function recaptcha_v3_validate($solution, $captcha_response, $element, FormState
   }
 
   $captcha_type_challenge = $form_state->getTemporaryValue('recaptcha_v3_action_name');
-  // Verify submitted reCAPTCHA v3 token.
+  /** @var ReCaptchaV3ActionInterface $recaptcha_v3 */
   $recaptcha_v3 = ReCaptchaV3Action::load($captcha_type_challenge) ?? ReCaptchaV3Action::create([
     'id' => '',
     'label' => '',
     'threshold' => 1,
     'challenge' => 'default',
   ]);
+  // Verify submitted reCAPTCHA v3 token.
   $verification_response = _recaptcha_v3_verify_captcha_response($recaptcha_v3, $captcha_response);
 
   if (!$verification_response['success']) {
     // If we here, then token verification failed.
     if ($verification_response['error-codes']) {
       $errors = [];
+
+      $challenge = $recaptcha_v3->getChallenge();
+      if ($challenge === 'default') {
+        $challenge = \Drupal::config('recaptcha_v3.settings')
+          ->get('default_challenge');
+      }
+
       foreach ($verification_response['error-codes'] as $code) {
+        // If we have fallback challenge then do not log the threshold errors.
+        if ($challenge && $code === 'score-threshold-not-met') {
+          continue;
+        }
         $errors[] = recaptcha_v3_error_by_code($code);
       }
-      $errors_string = implode(' ', $errors);
-      \Drupal::logger('recaptcha_v3')->error('Google reCAPTCHA v3 validation failed: @error', ['@error' => $errors_string]);
+
+      if ($errors) {
+        $errors_string = implode(' ', $errors);
+        \Drupal::logger('recaptcha_v3')->error(
+          'Google reCAPTCHA v3 validation failed: @error',
+          ['@error' => $errors_string]
+        );
+      }
     }
 
     $error_message = \Drupal::config('recaptcha_v3.settings')
