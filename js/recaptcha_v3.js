@@ -9,9 +9,9 @@
         var $input = $(this);
         grecaptcha.ready(function () {
           grecaptcha.execute(
-            $input.data('recaptchaV3Sitekey'),
+            $input.data('recaptcha-v3-sitekey'),
             {
-              action: $input.data('recaptchaV3Action')
+              action: $input.data('recaptcha-v3-action')
             })
           .then(function (token) {
             $input.val(token);
