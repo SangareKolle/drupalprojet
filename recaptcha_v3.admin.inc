@@ -10,6 +10,7 @@
  */
 function recaptcha_v3_admin_settings($form, &$form_state) {
   module_load_include('inc', 'captcha', 'captcha.admin');
+  $form['#variable_edit_form'] = TRUE;
   $form['general_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('General settings'),
@@ -134,7 +135,7 @@ function recaptcha_v3_admin_settings($form, &$form_state) {
       t('If <strong>Challenge</strong> value is <strong>None</strong>, then instead additional challenge recaptcha v3 will be used again. This may cause unability to submit form.'),
     ),
   );
-  $form['actions_settings']['recaptcha_v3_error_message'] = array(
+  $form['recaptcha_v3_error_message'] = array(
     '#type' => 'textfield',
     '#size' => 128,
     '#title' => t('Error message'),
@@ -203,7 +204,7 @@ function recaptcha_v3_admin_settings_submit($form, &$form_state) {
   variable_set('recaptcha_v3_secret_key', $form_state['values']['recaptcha_v3_secret_key']);
   variable_set('recaptcha_v3_verify_hostname', $form_state['values']['recaptcha_v3_verify_hostname']);
   variable_set('recaptcha_v3_captcha_default_challenge', $form_state['values']['actions_settings']['recaptcha_v3_captcha_default_challenge']);
-  variable_set('recaptcha_v3_error_message', $form_state['values']['actions_settings']['recaptcha_v3_error_message']);
+  variable_set('recaptcha_v3_error_message', $form_state['values']['recaptcha_v3_error_message']);
 
   $actions = _recaptcha_v3_get_all_actions();
   if (!empty($form_state['values']['actions_settings']['overview'])) {

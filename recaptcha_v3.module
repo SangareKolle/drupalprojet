@@ -241,7 +241,7 @@ function recaptcha_v3_captcha_validate($solution, $response, $element, &$form_st
     return TRUE;
   }
   $message = variable_get('recaptcha_v3_error_message', t('Recaptcha verification failed.'));
-  form_error($element, $message);
+  form_set_error('captcha_response', $message);
   return FALSE;
 }
 
@@ -316,4 +316,32 @@ function _recaptcha_v3_get_all_actions() {
     ->fields('a')
     ->execute()
     ->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+}
+
+/**
+ * Implements hook_variable_group_info().
+ */
+function recaptcha_v3_variable_group_info() {
+  $groups['recaptcha_v3'] = array(
+    'title' => t('reCAPTCHA v3 settings'),
+    'description' => t('reCAPTCHA v3 settings'),
+    'access' => 'administer site configuration',
+    'path' => array('admin/config/people/captcha/recaptcha-v3'),
+  );
+  return $groups;
+}
+
+/**
+ * Implements hook_variable_info().
+ */
+function recaptcha_v3_variable_info($options) {
+  $variables['recaptcha_v3_error_message'] = array(
+    'type' => 'string',
+    'title' => t('Error message', array(), $options),
+    'default' => 'Recaptcha verification failed.',
+    'description' => t('This message will be displayed to user in case of failed recaptcha v3 verification.', array(), $options),
+    'required' => TRUE,
+    'group' => 'recaptcha_v3',
+  );
+  return $variables;
 }
