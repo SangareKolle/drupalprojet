@@ -130,7 +130,7 @@ function recaptcha_v3_admin_settings($form, &$form_state) {
   $form['actions_settings']['new']['description'] = array(
     '#theme' => 'item_list',
     '#items' => array(
-      t('<strong>Action</strong> may only contain alphanumeric characters and slashes'),
+      t('<strong>Action</strong> may only contain alphanumeric characters, underscores and forward slashes.'),
       t('Additional verification <strong>Challenge</strong> will be executed, if google verification response scores will be lower then in <strong>Scores</strong> select box.'),
       t('If <strong>Challenge</strong> value is <strong>None</strong>, then instead additional challenge recaptcha v3 will be used again. This may cause unability to submit form.'),
     ),
@@ -174,8 +174,8 @@ function theme_recaptcha_v3_admin_settings_actions_overview($variables) {
 function recaptcha_v3_admin_settings_validate($form, &$form_state) {
   $new_action = $form_state['values']['actions_settings']['new'];
   if (!empty($new_action['action'])) {
-    if (!preg_match('/^[0-9a-zA-z\/]+$/', $new_action['action'])) {
-      form_set_error('actions_settings][new][action', t('Action may only contain alphanumeric characters and slashes.'));
+    if (!preg_match('/^([0-9a-zA-Z\/_]+)$/', $new_action['action'])) {
+      form_set_error('actions_settings][new][action', t('Action may only contain alphanumeric characters, underscores and forward slashes.'));
     }
     if (empty($new_action['id'])) {
       form_set_error('actions_settings][new][id', t('Action machine name is required.'));
@@ -187,8 +187,8 @@ function recaptcha_v3_admin_settings_validate($form, &$form_state) {
   if (!empty($form_state['values']['actions_settings']['overview'])) {
     $form_actions = $form_state['values']['actions_settings']['overview'];
     foreach ($form_actions as $id => $form_action) {
-      if (!preg_match('/^[0-9a-zA-z\/]+$/', $form_action['action'])) {
-        form_set_error('actions_settings][overview][' . $id . '][action', t('Action may only contain alphanumeric characters and slashes.'));
+      if (!preg_match('/^([0-9a-zA-Z\/_]+)$/', $form_action['action'])) {
+        form_set_error('actions_settings][overview][' . $id . '][action', t('Action may only contain alphanumeric characters, underscores and forward slashes.'));
       }
     }
   }

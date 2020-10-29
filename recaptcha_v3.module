@@ -247,16 +247,17 @@ function recaptcha_v3_captcha_validate($solution, $response, $element, &$form_st
 
 /**
  * Form element for recaptcha v3.
- * @param $action
+ * @param $action_id
  *
  * @return array
  */
-function recaptcha_v3_token_element($action) {
+function recaptcha_v3_token_element($action_id) {
+  $action = _recaptcha_v3_get_action_by_id($action_id);
   return array(
     '#type' => 'hidden',
     '#default_value' => '',
     '#attributes' => array(
-      'data-recaptcha-v3-action' => $action,
+      'data-recaptcha-v3-action' => $action['action'],
       'data-recaptcha-v3-sitekey' => variable_get('recaptcha_v3_site_key', ''),
     ),
     '#attached' => array(
