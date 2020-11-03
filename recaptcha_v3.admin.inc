@@ -111,8 +111,6 @@ function recaptcha_v3_admin_settings($form, &$form_state) {
     '#machine_name' => array(
       'exists' => '_recaptcha_v3_id_exists',
       'source' => array('actions_settings', 'new', 'action'),
-      'label' => t('Machine name'),
-      'replace_pattern' => '[^a-z0-9]+',
     ),
     '#required' => FALSE,
   );
