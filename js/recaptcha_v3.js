@@ -10,7 +10,7 @@
     // Wait for grecaptcha to be loaded.
     if (typeof grecaptcha === 'undefined') {
       var timer = setInterval(function() {
-        if (typeof grecaptcha === 'undefined' || !element) {
+        if (typeof grecaptcha !== 'undefined' || !element) {
           clearInterval(timer);
 
           if (element) {
