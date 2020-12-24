@@ -61,8 +61,7 @@ function recaptcha_v3_admin_settings($form, &$form_state) {
   $actions = _recaptcha_v3_get_all_actions();
   foreach ($actions as $id => $action) {
     $form['actions_settings']['overview'][$id]['id'] = array(
-      '#type' => 'value',
-      '#value' => $id,
+      '#markup' => $id,
     );
     $form['actions_settings']['overview'][$id]['action'] = array(
       '#type' => 'textfield',
@@ -150,11 +149,12 @@ function recaptcha_v3_admin_settings($form, &$form_state) {
 
 function theme_recaptcha_v3_admin_settings_actions_overview($variables) {
   $table = $variables['form'];
-  $header = array(t('Action'), t('Score'), t('Challenge type'), t('Delete'));
+  $header = array(t('Machine name'), t('Action'), t('Score'), t('Challenge type'), t('Delete'));
   $rows = array();
   // Existing CAPTCHA points.
   foreach (element_children($table) as $key) {
     $row = array();
+    $row[] = drupal_render($table[$key]['id']);
     $row[] = drupal_render($table[$key]['action']);
     $row[] = drupal_render($table[$key]['score']);
     $row[] = drupal_render($table[$key]['challenge']);
