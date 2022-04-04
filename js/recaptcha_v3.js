@@ -51,7 +51,7 @@
    */
   Drupal.behaviors.reCaptchaV3 = {
     attach: function (context) {
-      $('.recaptcha-v3-token', context).once('recaptcha-v3-token').each(function () {
+      once('recaptcha-v3-token', '.recaptcha-v3-token', context).forEach(function () {
         var element = this;
 
         updateTokenElement(element);
